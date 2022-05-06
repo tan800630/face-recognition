@@ -3,7 +3,6 @@
 ## Description
 
 
----
 
 ## Getting started
 
@@ -17,12 +16,11 @@ pip install -r requirements.txt
 
 ## method B:
 
-``
+```
 pip install deepface==0.0.73
 pip install mediapipe==0.8.10
 ```
 
----
 
 ## Basic usage
 
