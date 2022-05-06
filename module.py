@@ -2,8 +2,6 @@ from deepface import DeepFace
 import numpy as np
 import os
 import cv2
-import dlib
-import matplotlib.pyplot as plt
 import mediapipe
 from time import time
 
@@ -164,8 +162,6 @@ class recognition_model():
         result = []
         for image in image_ls:
             emb = self.get_embedding(image)
-            
-            print(np.array(emb).shape)
             
             if sim=='cosine':
 
