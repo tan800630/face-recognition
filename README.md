@@ -8,13 +8,13 @@
 
 Python version : 3.7
 
-## method A:
+### method A:
 
 ```
 pip install -r requirements.txt
 ```
 
-## method B:
+### method B:
 
 ```
 pip install deepface==0.0.73
