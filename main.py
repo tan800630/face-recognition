@@ -9,12 +9,6 @@ from PIL import ImageTk
 class App():
     def __init__(self, root, window_title = '', video_source = 0, size = (1800, 500)):
         
-        ## attributes for main window
-        
-        self.root = root
-        self.root.title(window_title)
-        self.window = tk.Frame(self.root, width = size[0], height = size[1])
-        
         ##  attributes for streaming
         
         self.video_source = video_source
@@ -44,46 +38,63 @@ class App():
         self.prediction_text.set('Prediction.')
         
         
-        ## widgets 
+        ## attributes for UI
+        
+        self.root = root
+        self.root.title(window_title)
+        
+        self.left_window = tk.Frame(self.root, width = int(size[0] * 1/3), height = size[1]) #, bg = 'blue'
+        self.right_top_window = tk.Frame(self.root, width = int(size[0] * 2/3 * 1/3), height = int(size[1] * 1/2)) #, bg = 'yellow'
+        self.right_bottom_window = tk.Frame(self.root, width = int(size[0] * 2/3 * 1/3), height = int(size[1] * 1/2))       
+        self.left_window.grid(row = 0, column = 0, rowspan = 2)
+        self.right_top_window.grid(row = 0, column = 1)
+        self.right_bottom_window.grid(row = 1, column = 1)
+        
+        ## Left window 
         
         # canvas for video streaming
-        self.streaming_w = tk.Canvas(self.root, width = int(size[0] * 1/3), height = int(size[1] * 6/7))
+        self.streaming_w = tk.Canvas(self.left_window, width = int(size[0] * 1/3), height = int(size[1] * 6/7))
         # streaming button
-        self.streaming_button = tk.Button(self.root, text = 'Use Webcam', command = self.update)
+        self.streaming_button = tk.Button(self.left_window, text = 'Use Webcam', command = self.update)
         # SnapShot button
-        self.snapshot_button = tk.Button(self.root, text = 'Snapshot', command = self.snapshot)
+        self.snapshot_button = tk.Button(self.left_window, text = 'Snapshot', command = self.snapshot)
         # open image button
-        self.open_image_button = tk.Button(self.root, text = 'Open file', command = self.openfile_and_readimg)
+        self.open_image_button = tk.Button(self.left_window, text = 'Open file', command = self.openfile_and_readimg)
+        
+        self.streaming_w.grid(row = 0, column = 0, columnspan = 3)
+        self.streaming_button.grid(row = 1, column = 0, pady = 10)
+        self.snapshot_button.grid(row = 1, column = 1, pady = 10)
+        self.open_image_button.grid(row = 1, column = 2, pady = 10)
+        self.vseparator = ttk.Separator(self.left_window, orient='vertical').grid(row = 0, column = 3, rowspan = 2, sticky = 'ns')
+        
+        ## Right-top window 
+
         # canvas for face detection
-        self.face_w = tk.Canvas(self.root, width = int(size[0] * 1/3 * 1/3), height = int(size[1] * 1/3))
+        self.face_w = tk.Canvas(self.right_top_window, width = int(size[0] * 1/3 * 1/3), height = int(size[1] * 1/3))
         # Prediction text
-        self.pred_text = tk.Label(self.root, textvariable = self.prediction_text)
+        self.pred_text = tk.Label(self.right_top_window, textvariable = self.prediction_text)
         # Detect Face button
-        self.detect_button = tk.Button(self.root, text = 'Face Detection', command = self.face_detect_and_draw)
+        self.detect_button = tk.Button(self.right_top_window, text = 'Face Detection', command = self.face_detect_and_draw)
         # Previous & Next button
-        self.prev_button = tk.Button(self.root, text = 'Prev', command = self.prev_face)
-        self.next_button = tk.Button(self.root, text = 'Next', command = self.next_face)
-        # Save file button
-        self.save_button = tk.Button(self.root, text = 'Save', command = self.savefile)
-        
-        
-        # Layout setting
-        self.streaming_w.grid(row = 0, column = 0, columnspan = 3, rowspan = 6)
-        self.streaming_button.grid(row = 6, column = 0, pady = 10)
-        self.snapshot_button.grid(row = 6, column = 1, pady = 10)
-        self.open_image_button.grid(row = 6, column = 2, pady = 10)
-        self.vseparator = ttk.Separator(self.root, orient='vertical').grid(row = 0, column = 3, rowspan = 6, sticky = 'ns')
-        self.face_w.grid(row = 0, column = 4, rowspan = 2, padx = 10, pady = 10)
-        self.pred_text.grid(row = 2, column = 4, columnspan = 2, padx = 10, pady = 10)
-        self.detect_button.grid(row = 3, column = 4, columnspan = 2, padx = 10)
-        self.prev_button.grid(row = 0, column = 6, sticky = tk.S, padx = 10, pady = 5)
-        self.next_button.grid(row = 1, column = 6, sticky = tk.N, padx = 10, pady = 5)
+        self.prev_button = tk.Button(self.right_top_window, text = 'Prev', command = self.prev_face)
+        self.next_button = tk.Button(self.right_top_window, text = 'Next', command = self.next_face)
+
+        self.face_w.grid(row = 0, column = 0, rowspan = 2, padx = 10, pady = 10)
+        self.prev_button.grid(row = 0, column = 1, sticky = tk.S, padx = 10, pady = 5)
+        self.next_button.grid(row = 1, column = 1, sticky = tk.N, padx = 10, pady = 5)
         self.prev_button['state'] = tk.DISABLED
         self.next_button['state'] = tk.DISABLED
-        self.hseparator = ttk.Separator(self.root, orient='horizontal').grid(row = 4, column = 4, columnspan = 2, sticky = 'ew')
-        self.save_button.grid(row = 5, column = 4)
+        self.pred_text.grid(row = 2, column = 0, padx = 10, pady = 10)
+        self.detect_button.grid(row = 3, column = 0, columnspan = 1, padx = 10, pady = 2, sticky = tk.N)
+        self.hseparator = ttk.Separator(self.right_top_window, orient='horizontal').grid(row = 4, column = 0, columnspan = 2, sticky = 'ew')
+
+        ## Right-bottom window 
+
+        # Save file button
+        self.save_button = tk.Button(self.right_bottom_window, text = 'Save', command = self.savefile)        
+        self.save_button.grid(row = 0, column = 0)
         
-        self.window.mainloop()
+        self.root.mainloop()
 
         
     def openfile_and_readimg(self):
