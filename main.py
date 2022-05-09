@@ -35,7 +35,7 @@ class App():
         self.open_filename = tk.StringVar()
         self.save_filepath = tk.StringVar()
         self.prediction_text = tk.StringVar()
-        self.prediction_text.set('Prediction.')
+        self.prediction_text.set('')
         
         
         ## attributes for UI
@@ -58,6 +58,7 @@ class App():
         self.streaming_button = tk.Button(self.left_window, text = 'Use Webcam', command = self.update)
         # SnapShot button
         self.snapshot_button = tk.Button(self.left_window, text = 'Snapshot', command = self.snapshot)
+        self.snapshot_button['state'] = tk.DISABLED
         # open image button
         self.open_image_button = tk.Button(self.left_window, text = 'Open file', command = self.openfile_and_readimg)
         
@@ -86,6 +87,7 @@ class App():
         self.next_button['state'] = tk.DISABLED
         self.pred_text.grid(row = 2, column = 0, padx = 10, pady = 10)
         self.detect_button.grid(row = 3, column = 0, columnspan = 1, padx = 10, pady = 2, sticky = tk.N)
+        self.detect_button['state'] = tk.DISABLED
         self.hseparator = ttk.Separator(self.right_top_window, orient='horizontal').grid(row = 4, column = 0, columnspan = 2, sticky = 'ew')
 
         ## Right-bottom window 
@@ -99,9 +101,12 @@ class App():
         
     def openfile_and_readimg(self):
         
+        # reset face window
+        self.reset_face_window()
+        
         # cancel video streaming and enable streaming button
         if self.streaming_id:
-            self.window.after_cancel(self.streaming_id)
+            self.root.after_cancel(self.streaming_id)
             self.streaming_button['state'] = tk.NORMAL
         
         # reset detection_faces
@@ -117,6 +122,8 @@ class App():
         self.image = img
         
         self.draw(self.image, self.streaming_w)
+        self.prediction_text.set('Press detection button.')
+        self.detect_button['state'] = tk.NORMAL
 
         
     def savefile(self):
@@ -132,7 +139,7 @@ class App():
     def update(self):
         
         # reset snapshot photo
-        self.image = None
+        self.reset_face_window()
         
         ret, frame = self.vid.get_frame()
         
@@ -140,26 +147,28 @@ class App():
             self.draw(frame, self.streaming_w)
 
         
-        self.streaming_id = self.window.after(self.delay, self.update)
+        self.streaming_id = self.root.after(self.delay, self.update)
         self.streaming_button['state'] = tk.DISABLED
+        self.snapshot_button['state'] = tk.NORMAL
         
     def snapshot(self):
         
         # cancel video streaming and enable streaming_button
         if self.streaming_id:
-            self.window.after_cancel(self.streaming_id)
+            self.root.after_cancel(self.streaming_id)
             self.streaming_button['state'] = tk.NORMAL
+            self.snapshot_button['state'] = tk.DISABLED
+
         
-        # reset detection_faces
-        self.detection_faces = None
-        self.prev_button['state'] = tk.DISABLED
-        self.next_button['state'] = tk.DISABLED
+        self.reset_face_window()
         
         ret, frame = self.vid.get_frame()
         self.image = frame
         
         if ret:
             self.draw(frame, self.streaming_w)
+            self.prediction_text.set('Press detection button')
+            self.detect_button['state'] = tk.NORMAL
             
     def face_detect_and_draw(self):
         
@@ -186,6 +195,9 @@ class App():
                 
                 # draw prediction text
                 self.prediction_text.set(self.recognition_result[self.face_id])
+                
+                # disable detection button
+                self.detect_button['state'] = tk.DISABLED
             
             if len(face_ls)>1:
                 self.prev_button['state'] = tk.NORMAL
@@ -224,7 +236,18 @@ class App():
         
         canvas.image = image
         canvas.create_image(0, 0, image = canvas.image, anchor = tk.NW)
+    
+    def reset_face_window(self):
         
+        self.image = None
+        self.detection_faces = None
+        
+        self.face_w.delete("all")
+        self.prediction_text.set('')
+        
+        self.detect_button['state'] = tk.DISABLED
+        self.prev_button['state'] = tk.DISABLED
+        self.next_button['state'] = tk.DISABLED
 
             
 class VideoCapture():
